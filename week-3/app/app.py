@@ -1,4 +1,5 @@
 import os
+
 from datetime import datetime, timezone
 
 from flask import Flask, redirect, render_template, request, url_for
@@ -55,6 +56,8 @@ def update_status(ticket_id):
             ticket["status"] = status
             break
     return redirect(url_for("index"))
+
+
 
 
 if __name__ == "__main__":
