@@ -5,7 +5,7 @@ resource "kubernetes_deployment_v1" "web" {
   }
 
   spec {
-    replicas = 3
+    replicas = 1
 
     selector {
       match_labels = { app = "web" }
@@ -17,6 +17,12 @@ resource "kubernetes_deployment_v1" "web" {
       }
 
       spec {
+        security_context {
+          run_as_non_root = true
+          run_as_user     = "10001"
+          run_as_group    = "10001"
+        }
+
         container {
           name              = "web"
           image             = "docker.io/library/week-4-web:latest"
@@ -24,6 +30,25 @@ resource "kubernetes_deployment_v1" "web" {
 
           port {
             container_port = 5000
+          }
+
+          security_context {
+            allow_privilege_escalation = false
+
+            capabilities {
+              drop = ["ALL"]
+            }
+          }
+
+          resources {
+            requests = {
+              cpu    = "50m"
+              memory = "64Mi"
+            }
+            limits = {
+              cpu    = "500m"
+              memory = "256Mi"
+            }
           }
 
           env_from {
@@ -68,7 +93,6 @@ resource "kubernetes_deployment_v1" "web" {
     }
   }
 
-  # web does not reference anything from the db Deployment, so state the order explicitly.
   depends_on = [kubernetes_deployment_v1.db]
 }
 
